@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-contract MyContract{
+contract Crowdfunding{
 
     struct Campaign{
         address owner;
@@ -48,11 +48,39 @@ contract MyContract{
 
     
 
-    function donateToCampign() public {}
+    function donateToCampaign(uint _id) public payable{
 
-    function getdonators() public {}
+        uint amount = msg.value;//msg.value means amount sending by donator
+        Campaign storage campaign = campaigns[_id];
+        campaign.donators.push(msg.sender);
+        campaign.donations.push(amount);
+        
 
-    function getCampaign() public {}
+        (bool sent, ) = payable(campaign.owner).call{value: amount}("");
+        if(sent){
+            campaign.amountCollected = campaign.amountCollected + amount;
+        }
+    }
+
+    function getdonators(uint _id) public view returns(address[] memory,uint[] memory) {
+
+        return (campaigns[_id].donators,campaigns[_id].donations);
+
+
+    }
+
+    function getCampaign() public view returns(Campaign[]memory) {
+
+        Campaign[] memory allCampaigns = new Campaign[](numberofCampaigns);
+
+        for(uint i =0 ; i< numberofCampaigns ; i++){
+
+            Campaign storage item = campaigns[i];
+            allCampaigns[i] = item;
+
+        }
+        return allCampaigns;
+    }
 
 
 
